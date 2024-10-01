@@ -4,6 +4,7 @@
 - Composer (v2.5.8) <- a dependency manager for PHP. It helps you to manage the libraries and frameworks that your PHP projects depend on
 - PHP v8.2.2 <- as of making this project
 - MongoDB v8 <- NoSQL Database used as of making this project
+- PyMongo v4.10.0, watchdog 5.0.3, email_validator v2.2.0 <- python libraries used in this project
 
 
 - ## Laragon
@@ -34,3 +35,4 @@ Download and Install Composer v2.5.8 in this website https://getcomposer.org/dow
 
 ## MongoDB Version and PyMongo
 1. I'm using Windows, so what I did was install MongoDB v8.0 in my system first and followed the installation wizard.
+2. You can install other python libraries mentioned in the Prerequisites section of ReadMe.md
