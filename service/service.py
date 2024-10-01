@@ -1,3 +1,8 @@
+import os
+import json
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 from pymongo import MongoClient
 import re
 from email_validator import validate_email, EmailNotValidError
@@ -6,6 +11,9 @@ from email_validator import validate_email, EmailNotValidError
 client = MongoClient('mongodb://localhost:27017/')
 db = client['contact_list']
 contacts_collection = db['contacts']
+
+# Directory to watch
+WATCH_DIRECTORY = './api/storage/app/private/contacts'
 
 def normalize_phone(phone):
     digits = re.sub(r'\D', '', phone)
@@ -35,3 +43,17 @@ def validate_contact(contact):
     
     return contact
 
+
+def process_current_file():
+    files = sorted(
+        [f for f in os.listdir(WATCH_DIRECTORY) if f.endswith('.json')],
+        key=lambda x: os.path.getmtime(os.path.join(WATCH_DIRECTORY, x))
+    )
+    
+    if files:
+        latest_file = os.path.join(WATCH_DIRECTORY, files[-1])
+        print(f"Processing existing file: {latest_file}")
+
+if __name__ == "__main__":
+    process_current_file()
+    
