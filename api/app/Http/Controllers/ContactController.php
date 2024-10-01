@@ -36,23 +36,39 @@ class ContactController extends Controller
 
         $stringJson = file_get_contents($latestFile);
         $cleanJson = json_decode($stringJson, true);
-
         return response()->json([
             'data' => $cleanJson
         ], 200);
     }
 
-    public function show($email = '', $name = '', $phone_num = '')
+    public function show(Request $request)
     {
-        $allContacts = $this->showAll();
-        if (isset($allContacts[$email])) {
-            dd($allContacts[$email]);
-            // return $allContacts[$email];
+        $allContacts = $this->showAll()->getData();
+        $queriedData = $allContacts->data;
+        
+        $matchedContact = null;
 
+        foreach ($queriedData as $data) {
+            if (
+                ($data->email == $request->email) ||
+                ($data->name == $request->name) ||
+                ($data->phone == $request->phone)
+            ) {
+                $matchedContact = $data;
+                break; 
+            }
         }
-        // return response()->json([
-        //     'data' => $cleanJson
-        // ], 200);
+
+        if ($matchedContact) {
+            return response()->json([
+                'data' => $matchedContact
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'not found',
+                'message' => 'No contact matches the provided email, name, or phone number'
+            ], 404);
+        }
     }
 
     public function index(Request $request, $perPage = 5)
