@@ -17,7 +17,7 @@ class ContactController extends Controller
 
         $file = $request->file('file');
         $filename = time() . '_' . $file->getClientOriginalName();
-        
+
         $file->storeAs('contacts', $filename);
 
         return response()->json(['message' => 'File uploaded successfully'], 200);
@@ -45,7 +45,7 @@ class ContactController extends Controller
     {
         $allContacts = $this->showAll()->getData();
         $queriedData = $allContacts->data;
-        
+
         $matchedContact = null;
 
         foreach ($queriedData as $data) {
@@ -55,7 +55,7 @@ class ContactController extends Controller
                 ($data->phone == $request->phone)
             ) {
                 $matchedContact = $data;
-                break; 
+                break;
             }
         }
 
@@ -74,16 +74,16 @@ class ContactController extends Controller
     public function index(Request $request, $perPage = 5)
     {
         $allContacts = $this->showAll()->getData();
-        // dd($allContacts->data);
-        // dd($theJson);
-        $currentPage = $request->get('page', 1); 
+        $stringJson = json_encode($allContacts, true);
+        $toArray = json_decode($stringJson, true);
+        $currentPage = $request->get('page', 1);
         $offset = ($currentPage - 1) * $perPage;
 
-        $currentPageItems = array_slice($allContacts->data, $offset, $perPage);
+        $currentPageItems = array_slice($toArray['data'], $offset, $perPage);
 
         $paginator = new LengthAwarePaginator(
             $currentPageItems,
-            count($allContacts->data),
+            count($toArray['data']),
             $perPage,
             $currentPage,
             ['path' => $request->url(), 'query' => $request->query()]
@@ -92,4 +92,40 @@ class ContactController extends Controller
             "data" => $paginator
         ], 200);
     }//
+
+    public function create(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+        ]);
+
+        try {
+            $allContacts = $this->showAll()->getData();
+            $contacts = $allContacts->data;
+
+            $newContact = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+            ];
+
+            $index = count($allContacts->data) + 1;
+            $contacts[$index] = $newContact;
+
+            $directory = storage_path('app/private/contacts');
+
+            $files = glob($directory . '/*.json');
+
+            $latestFile = max($files);
+            // dd("WHY?");
+
+            file_put_contents($latestFile, json_encode($contacts, JSON_PRETTY_PRINT));
+
+            return response()->json(['message' => 'Contact created successfully', 'data' => $newContact], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Contact creation failed', 'error' => $e->getMessage()], 500);
+        }
+    }
 }
