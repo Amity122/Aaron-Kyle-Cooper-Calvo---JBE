@@ -119,13 +119,73 @@ class ContactController extends Controller
             $files = glob($directory . '/*.json');
 
             $latestFile = max($files);
-            // dd("WHY?");
 
             file_put_contents($latestFile, json_encode($contacts, JSON_PRETTY_PRINT));
 
             return response()->json(['message' => 'Contact created successfully', 'data' => $newContact], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Contact creation failed', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function update(Request $request, $email)
+    {
+        $request->validate([
+            'name' => 'string',
+            'phone' => 'string',
+        ]);
+
+        try {
+            $allContacts = $this->showAll()->getData();
+            $contacts = $allContacts->data;
+
+            foreach ($contacts as &$contact) {
+                if ($contact->email === $email) {
+                    if ($request->name != '') {
+                        $contact->name = $request->name;
+                    }
+                    if ($request->phone != '') {
+                        $contact->phone = $request->phone;
+                    }
+
+                    $directory = storage_path('app/private/contacts');
+
+                    $files = glob($directory . '/*.json');
+
+                    $latestFile = max($files);
+
+                    file_put_contents($latestFile, json_encode($contacts, JSON_PRETTY_PRINT));
+                    
+                    return response()->json(['message' => 'Contact updated successfully', 'data' => $contact], 200);
+                }
+            }
+
+            return response()->json(['message' => 'Contact not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Contact update failed', 'error' => $e->getMessage()], 500);
+        }
+
+    }
+    public function destroy($email)
+    {
+        try {
+            $directory = storage_path('app/private/contacts');
+            $files = glob($directory . '/*.json');
+
+            $latestFile = max($files);
+            $contacts = json_decode(file_get_contents($latestFile), true);
+
+            $contactIndex = array_search($email, array_column($contacts, 'email'));
+
+            if ($contactIndex === false) {
+                return response()->json(['message' => 'Contact not found'], 404);
+            }
+
+            array_splice($contacts, $contactIndex, 1);
+
+            return response()->json(['message' => 'Contact deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Contact deletion failed', 'error' => $e->getMessage()], 500);
         }
     }
 }
