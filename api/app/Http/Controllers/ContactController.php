@@ -26,7 +26,7 @@ class ContactController extends Controller
     # Needs validation if File isn't a json
     # Needs try and exception block
 
-    public function index(Request $request, $perPage = 5)
+    public function showAll()
     {
         $directory = storage_path('app/private/contacts');
 
@@ -36,21 +36,44 @@ class ContactController extends Controller
 
         $stringJson = file_get_contents($latestFile);
         $cleanJson = json_decode($stringJson, true);
+
+        return response()->json([
+            'data' => $cleanJson
+        ], 200);
+    }
+
+    public function show($email = '', $name = '', $phone_num = '')
+    {
+        $allContacts = $this->showAll();
+        if (isset($allContacts[$email])) {
+            dd($allContacts[$email]);
+            // return $allContacts[$email];
+
+        }
+        // return response()->json([
+        //     'data' => $cleanJson
+        // ], 200);
+    }
+
+    public function index(Request $request, $perPage = 5)
+    {
+        $allContacts = $this->showAll()->getData();
+        // dd($allContacts->data);
         // dd($theJson);
         $currentPage = $request->get('page', 1); 
         $offset = ($currentPage - 1) * $perPage;
 
-        $currentPageItems = array_slice($cleanJson, $offset, $perPage);
+        $currentPageItems = array_slice($allContacts->data, $offset, $perPage);
 
         $paginator = new LengthAwarePaginator(
             $currentPageItems,
-            count($cleanJson),
+            count($allContacts->data),
             $perPage,
             $currentPage,
             ['path' => $request->url(), 'query' => $request->query()]
         );
         return response()->json([
-            "message" => $paginator
+            "data" => $paginator
         ], 200);
     }//
 }
