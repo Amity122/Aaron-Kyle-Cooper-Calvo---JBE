@@ -60,11 +60,16 @@ def process_file(file_path):
     
     valid_contacts = []
     for contact in contacts:
-        valid_contact = validate_contact(contact)
-        valid_contacts.append(valid_contact)
+        try:
+            valid_contact = validate_contact(contact)
+            valid_contacts.append(valid_contact)
+        except ValueError as e:
+            print(f'This is an invalid contact: {e}, skipping...')
 
-    print(valid_contacts)
-
+    if valid_contacts:
+        # inserting to database 
+        contacts_collection.insert_many(documents=valid_contacts)
+        print(f'Inserted {len(valid_contacts)} into the database')
 
 def process_file_indir():
     files = sorted(
