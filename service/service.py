@@ -51,7 +51,9 @@ def validate_contact(contact):
     return contact
 
 def process_file(file_path):
-    pass
+    with open(file_path, 'r') as file:
+        contacts = json.load(file)
+        print(contacts)
 
 def process_file_indir():
     files = sorted(
@@ -62,6 +64,7 @@ def process_file_indir():
     if files:
         latest_file = os.path.join(WATCH_DIRECTORY, files[-1])
         print(f"Processing existing file: {latest_file}")
+        process_file(latest_file)
 
 if __name__ == "__main__":
     process_file_indir()
