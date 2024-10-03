@@ -20,6 +20,8 @@ def normalize_phone(phone):
     
     if len(digits) == 10:
         return f"+1-{digits[:3]}-{digits[3:6]}-{digits[6:]}"
+    elif len(digits) == 11 and digits[0] == '0':
+        return f'+63-{digits[1:4]}-{digits[4:7]}-{digits[7:]}'
     else:
         raise ValueError(f"Invalid phone number: {phone}")
 
