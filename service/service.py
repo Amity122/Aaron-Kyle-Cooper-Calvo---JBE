@@ -17,8 +17,10 @@ WATCH_DIRECTORY = './api/storage/app/private/contacts'
 
 
 class ContactHandler(FileSystemEventHandler):
-    def on_created():
-        pass
+    def on_created(self, event):
+        if not event.is_directory and event.src_path.endswith('.json'):
+            print(f"New file detected: {event.src_path}")
+            process_file(event.src_path)
 
 def normalize_phone(phone):
     digits = re.sub(r'\D', '', phone)
@@ -90,4 +92,15 @@ def process_file_indir():
 
 if __name__ == "__main__":
     process_file_indir()
+    event_handler = ContactHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path=WATCH_DIRECTORY, recursive=False)
+    observer.start() # create new thread
+
+    try:
+        while True:
+            time.sleep(1) # keeps main thread running
+    except KeyboardInterrupt:
+        observer.stop() # terminate
     
+    observer.join() # properly end the observer thread
