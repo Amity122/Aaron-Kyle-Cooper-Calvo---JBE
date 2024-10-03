@@ -72,7 +72,13 @@ def process_file(file_path):
         if valid_contacts:
             # inserting to database 
             contacts_collection.insert_many(documents=valid_contacts)
-            print(f'Inserted {len(valid_contacts)} contact into the database')
+            print(f'Inserted {len(valid_contacts)} contacts into the database')
+
+        # delete file if json file is clean + no validation errors
+        if len(valid_contacts) == len(contacts):
+            os.remove(file_path)
+            print(f"Removed processed file: {file_path}")
+
     except json.JSONDecodeError:
         print(f"Error: {file_path} is not a valid JSON file")
     except Exception as e:
