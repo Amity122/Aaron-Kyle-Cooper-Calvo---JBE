@@ -53,7 +53,18 @@ def validate_contact(contact):
 def process_file(file_path):
     with open(file_path, 'r') as file:
         contacts = json.load(file)
-        print(contacts)
+        # print(contacts[0])
+
+    if type(contacts) != list:
+        raise ValueError("JSON file should contain a list of contacts")
+    
+    valid_contacts = []
+    for contact in contacts:
+        valid_contact = validate_contact(contact)
+        valid_contacts.append(valid_contact)
+
+    print(valid_contacts)
+
 
 def process_file_indir():
     files = sorted(
