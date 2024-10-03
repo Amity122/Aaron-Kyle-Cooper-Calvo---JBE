@@ -15,6 +15,11 @@ contacts_collection = db['contacts']
 # Directory to watch
 WATCH_DIRECTORY = './api/storage/app/private/contacts'
 
+
+class ContactHandler(FileSystemEventHandler):
+    def on_created():
+        pass
+
 def normalize_phone(phone):
     digits = re.sub(r'\D', '', phone)
     
@@ -44,7 +49,6 @@ def validate_contact(contact):
         contact['phone'] = normalize_phone(contact['phone'])
     
     return contact
-
 
 def process_current_file():
     files = sorted(
