@@ -51,25 +51,31 @@ def validate_contact(contact):
     return contact
 
 def process_file(file_path):
-    with open(file_path, 'r') as file:
-        contacts = json.load(file)
-        # print(contacts[0])
+    try:
+        with open(file_path, 'r') as file:
+            contacts = json.load(file)
+            # print(contacts[0])
 
-    if type(contacts) != list:
-        raise ValueError("JSON file should contain a list of contacts")
-    
-    valid_contacts = []
-    for contact in contacts:
-        try:
-            valid_contact = validate_contact(contact)
-            valid_contacts.append(valid_contact)
-        except ValueError as e:
-            print(f'This is an invalid contact: {e}, skipping...')
+        if type(contacts) != list:
+            raise ValueError("JSON file should contain a list of contacts")
+        
+        valid_contacts = []
+        for contact in contacts:
+            try:
+                valid_contact = validate_contact(contact)
+                valid_contacts.append(valid_contact)
+            except ValueError as e:
+                print(f'This is an invalid contact: {e}, skipping...')
 
-    if valid_contacts:
-        # inserting to database 
-        contacts_collection.insert_many(documents=valid_contacts)
-        print(f'Inserted {len(valid_contacts)} into the database')
+        if valid_contacts:
+            # inserting to database 
+            contacts_collection.insert_many(documents=valid_contacts)
+            print(f'Inserted {len(valid_contacts)} contact into the database')
+    except json.JSONDecodeError:
+        print(f"Error: {file_path} is not a valid JSON file")
+    except Exception as e:
+        print(f"Error processing {file_path}: {str(e)}")
+
 
 def process_file_indir():
     files = sorted(
