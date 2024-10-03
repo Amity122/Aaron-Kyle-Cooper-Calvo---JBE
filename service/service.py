@@ -50,7 +50,10 @@ def validate_contact(contact):
     
     return contact
 
-def process_current_file():
+def process_file(file_path):
+    pass
+
+def process_file_indir():
     files = sorted(
         [f for f in os.listdir(WATCH_DIRECTORY) if f.endswith('.json')],
         key=lambda x: os.path.getmtime(os.path.join(WATCH_DIRECTORY, x))
@@ -61,5 +64,5 @@ def process_current_file():
         print(f"Processing existing file: {latest_file}")
 
 if __name__ == "__main__":
-    process_current_file()
+    process_file_indir()
     
