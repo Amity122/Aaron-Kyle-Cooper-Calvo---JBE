@@ -5,22 +5,33 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
-
+use Illuminate\Validation\ValidationException;
 class ContactController extends Controller
 {
 
     public function upload(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:json'
-        ]);
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:json'
+            ]);
 
-        $file = $request->file('file');
-        $filename = time() . '_' . $file->getClientOriginalName();
+            $file = $request->file('file');
 
-        $file->storeAs('contacts', $filename);
+            // Validate JSON content
+            $content = file_get_contents($file->path());
+            $json = json_decode($content);
 
-        return response()->json(['message' => 'File uploaded successfully'], 200);
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            $file->storeAs('contacts', $filename);
+
+            return response()->json(['message' => 'File uploaded successfully'], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
     }
 
     # Needs validation if File isn't a json
